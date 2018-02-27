@@ -11,6 +11,8 @@
 
 using namespace std;
 
+typedef long long LL;
+
 inline const int Get_Int() {
 	int num=0,bj=1;
 	char x=getchar();
@@ -25,7 +27,154 @@ inline const int Get_Int() {
 	return num*bj;
 }
 
+const int mod=10007,inv2=5004;
+
+struct FastWalshTransform {
+	int n;
+	void init(int n) {
+		this->n=n;
+	}
+	void transform(int *a,int mul) {
+		for(int len=2; len<=n; len<<=1) {
+			int mid=len>>1;
+			for(int *p=a; p!=a+n; p+=len)
+				for(int i=0; i<mid; i++) {
+					LL x=p[i],y=p[mid+i];
+					p[i]=(x+y)*mul%mod;
+					p[mid+i]=(x-y+mod)*mul%mod;
+				}
+		}
+	}
+	void fwt(int *a) {
+		transform(a,1);
+	}
+	void ufwt(int *a) {
+		transform(a,inv2);
+	}
+} wtf;
+
+struct Integer {
+	int num,cnt;
+	Integer(int v=0) {
+		if(v)num=v,cnt=0;
+		else num=cnt=1;
+	}
+	Integer operator * (int v) {
+		Integer a=*this;
+		if(!v)a.cnt++;
+		else a.num=a.num*v%mod;
+		return a;
+	}
+	Integer operator / (int v) {
+		Integer a=*this;
+		if(!v)a.cnt--;
+		else a.num=a.num*inv[v]%mod;
+		return a;
+	}
+	int val() {return cnt?0:num;}
+} f[maxn][maxm],g[maxn][maxm];
+
+void Dfs1(int Now,int fa,int depth) {
+	father[Now]=fa;
+	Depth[Now]=depth;
+	Size[Now]=1;
+	for(int Next:edges[Now]) {
+		if(Next==fa)continue;
+		Dfs1(Next,Now,depth+1);
+		Size[Now]+=Size[Next];
+		if(Size[Son[Now]]<Size[Next])Son[Now]=Next;
+	}
+}
+
+void Dfs2(int Now,int top) {
+	Top[Now]=top;
+	chain[top].push_back(Now);
+	if(Now==top)tops.push_back(Now);
+	if(Son[Now])Dfs2(Son[Now],top);
+	for(int Next:edges[Now]) {
+		if(Next==father[Now]||Next==Son[Now])continue;
+		Dfs2(Next,Next);
+	}
+}
+
+struct Tag {
+	int a,b,c,d;
+	Tag(int a=1,int b=0,int c=0,int d=0):a(a),b(b),c(c),d(d) {}
+	int f() {return a+c;}
+	int g() {return b+d;}
+	Tag operator + (const Tag &y) const {
+		return Tag(a*y.a,b+a*y.b,y.a*c+y.b,y.b*c+d+y.d);
+	}
+};
+
+struct Segment_Tree {
+	struct Tree {
+		int left,right;
+		int lson,rson;
+		Tag tag[maxm];
+		Tree(int l=0,int r=0):left(l),right(r),lson(0),rson(0) {}
+	} tree[maxn<<1];
+	int size;
+#define ls tree[index].lson
+#define rs tree[index].rson
+#define mid ((left+right)>>1)
+	void build(int &index,int left,int right,int top) {
+		if(!index)index=++size;
+		tree[index]=Tree(left,right);
+		if(left==right) {
+			int x=chain[top][left-1];
+			for(int i=0; i<m; i++) {
+				int tmp=f[x][i].val()*e[val[x]][i];
+				tree[index].tag[i]=Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]);
+			}
+			// pos[chain[top][left-1]]=left;
+			return;
+		}
+		build(ls,left,mid,top);
+		build(rs,mid+1,right,top);
+		push_up(index);
+	}
+	void push_up(int index) {
+		for(int i=0; i<m; i++)tree[index].tag[i]=tree[rs].tag[i]+tree[ls].tag[i];
+	}
+	Tag query(int index,int Left,int Right,int j) {
+		if(Right<tree[index].left||Left>tree[index].right)return Tag();
+		if(Left<=tree[index].left&&Right>=tree[index].right)return tree[index].tag[j];
+		return query(rs,Left,Right)+query(ls,Left,Right);
+	}
+} st;
+
+bool cmp(int x,int y) {
+	return Depth[x]>Depth[y];
+}
+
 int main() {
-	
+	n=Get_Int();
+	m=Get_Int();
+	fwt.init(m);
+	for(int i=0; i<m; i++) {
+		e[i][i]=1;
+		wt.fwt(e[i]);
+	}
+	inv[1]=1;
+	for(int i=2; i<mod; i++)inv[i]=(mod-mod/i)*inv[mod%i]%mod;
+	for(int i=1; i<=n; i++) {
+		val[i]=Get_Int();
+		for(int j=0; j<m; j++)f[i][j]=Int(1);
+	}
+	for(int i=1; i<n; i++) {
+		int x=Get_Int(),y=Get_Int();
+		AddEdge(x,y);
+		AddEdge(y,x);
+	}
+	sort(tops.begin(),tops.end(),cmp);
+	for(int x:tops) {
+		st.build(root[x],1,chain[x].size(),x);
+		if(father[x])
+			for(int i=0; i<m; i++) {
+				f[father[x]][i]*=(st.tree[root[x]].tag[i].f()+e[0][i]);
+				g[father[x]][i]=(g[father[x]][i]+st.tree[root[x]].tag[i].g())%mod;
+			}
+	}
 	return 0;
 }
