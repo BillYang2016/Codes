@@ -27,6 +27,7 @@ inline const int Get_Int() {
 	return num*bj;
 }
 
+const int maxn=30005,maxm=128;
 const int mod=10007,inv2=5004;
 
 struct FastWalshTransform {
@@ -53,6 +54,12 @@ struct FastWalshTransform {
 	}
 } wtf;
 
+int n,m,pos[maxn],root[maxn],val[maxn],father[maxn],Depth[maxn],Size[maxn],Son[maxn],Top[maxn];
+int e[maxn][maxm],g[maxn][maxm],ans[maxm];
+bool leaf[maxn];
+vector<int> edges[maxn],chain[maxn],tops;
+int inv[mod+5];
+
 struct Integer {
 	int num,cnt;
 	Integer(int v=0) {
@@ -71,8 +78,10 @@ struct Integer {
 		else a.num=a.num*inv[v]%mod;
 		return a;
 	}
+	void operator *=(int v) {*this=*this*v;}
+	void operator /=(int v) {*this=*this/v;}
 	int val() {return cnt?0:num;}
-} f[maxn][maxm],g[maxn][maxm];
+} f[maxn][maxm];
 
 void Dfs1(int Now,int fa,int depth) {
 	father[Now]=fa;
@@ -84,6 +93,7 @@ void Dfs1(int Now,int fa,int depth) {
 		Size[Now]+=Size[Next];
 		if(Size[Son[Now]]<Size[Next])Son[Now]=Next;
 	}
+	if(edges[Now].size()==1)leaf[Now]=1;
 }
 
 void Dfs2(int Now,int top) {
@@ -127,7 +137,7 @@ struct Segment_Tree {
 				int tmp=f[x][i].val()*e[val[x]][i];
 				tree[index].tag[i]=Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]);
 			}
-			// pos[chain[top][left-1]]=left;
+			pos[chain[top][left-1]]=left;
 			return;
 		}
 		build(ls,left,mid,top);
@@ -137,10 +147,20 @@ struct Segment_Tree {
 	void push_up(int index) {
 		for(int i=0; i<m; i++)tree[index].tag[i]=tree[rs].tag[i]+tree[ls].tag[i];
 	}
+	void modify(int index,int target,int j,Tag v) {
+		if(target<tree[index].left||target>tree[index].right)return;
+		if(tree[index].left==tree[index].right) {
+			tree[index].tag[j]=v;
+			return;
+		}
+		modify(ls,target,j,v);
+		modify(rs,target,j,v);
+		push_up(index);
+	}
 	Tag query(int index,int Left,int Right,int j) {
 		if(Right<tree[index].left||Left>tree[index].right)return Tag();
 		if(Left<=tree[index].left&&Right>=tree[index].right)return tree[index].tag[j];
-		return query(rs,Left,Right)+query(ls,Left,Right);
+		return query(rs,Left,Right,j)+query(ls,Left,Right,j);
 	}
 } st;
 
@@ -148,19 +168,35 @@ bool cmp(int x,int y) {
 	return Depth[x]>Depth[y];
 }
 
+void Modify(int x,int v) {
+	val[x]=v;
+	for(int t; father[t=Top[x]]; x=father[t],t=Top[x])
+		for(int i=0; i<m; i++) {
+			LL lastf=st.tree[root[t]].tag[i].f(),lastg=st.tree[root[t]].tag[i].g();
+			int tmp=f[x][i].val()*e[val[x]][i];
+			st.modify(root[t],pos[x],i,Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]));
+			f[father[t]][i]/=lastf+e[0][i],f[father[t]][i]*=st.tree[root[t]].tag[i].f()+e[0][i];
+			g[father[t]][i]=(g[father[t]][i]-lastg+mod)%mod,g[father[t]][i]=(g[father[t]][i]+st.tree[root[t]].tag[i].g())%mod;
+		}
+}
+
+void AddEdge(int x,int y) {
+	edges[x].push_back(y);
+}
+
 int main() {
 	n=Get_Int();
 	m=Get_Int();
-	fwt.init(m);
+	wtf.init(m);
 	for(int i=0; i<m; i++) {
 		e[i][i]=1;
-		wt.fwt(e[i]);
+		wtf.fwt(e[i]);
 	}
 	inv[1]=1;
 	for(int i=2; i<mod; i++)inv[i]=(mod-mod/i)*inv[mod%i]%mod;
 	for(int i=1; i<=n; i++) {
 		val[i]=Get_Int();
-		for(int j=0; j<m; j++)f[i][j]=Int(1);
+		for(int j=0; j<m; j++)f[i][j]=Integer(1);
 	}
 	for(int i=1; i<n; i++) {
 		int x=Get_Int(),y=Get_Int();
@@ -172,9 +208,21 @@ int main() {
 		st.build(root[x],1,chain[x].size(),x);
 		if(father[x])
 			for(int i=0; i<m; i++) {
-				f[father[x]][i]*=(st.tree[root[x]].tag[i].f()+e[0][i]);
+				f[father[x]][i]*=st.tree[root[x]].tag[i].f()+e[0][i];
 				g[father[x]][i]=(g[father[x]][i]+st.tree[root[x]].tag[i].g())%mod;
 			}
+	}
+	int q=Get_Int();
+	while(q--) {
+		char opt=' ';
+		while(!isalpha(opt))opt=getchar();
+		int x=Get_Int();
+		if(opt=='C')Modify(x,Get_Int());
+		else if(opt=='Q') {
+			for(int i=0; i<m; i++)ans[i]=st.tree[root[1]].tag[i].g();
+			wtf.ufwt(ans);
+			printf("%d\n",ans[x]);
+		}
 	}
 	return 0;
 }
