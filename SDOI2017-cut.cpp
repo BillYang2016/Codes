@@ -178,6 +178,10 @@ void Modify(int x,int v) {
 			f[father[t]][i]/=lastf+e[0][i],f[father[t]][i]*=st.tree[root[t]].tag[i].f()+e[0][i];
 			g[father[t]][i]=(g[father[t]][i]-lastg+mod)%mod,g[father[t]][i]=(g[father[t]][i]+st.tree[root[t]].tag[i].g())%mod;
 		}
+	for(int i=0; i<m; i++) {
+		int tmp=f[x][i].val()*e[val[x]][i];
+		st.modify(root[Top[x]],pos[x],i,Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]));
+	}
 }
 
 void AddEdge(int x,int y) {
@@ -203,6 +207,8 @@ int main() {
 		AddEdge(x,y);
 		AddEdge(y,x);
 	}
+	Dfs1(1,0,1);
+	Dfs2(1,1);
 	sort(tops.begin(),tops.end(),cmp);
 	for(int x:tops) {
 		st.build(root[x],1,chain[x].size(),x);
