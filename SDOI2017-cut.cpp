@@ -157,11 +157,6 @@ struct Segment_Tree {
 		modify(rs,target,j,v);
 		push_up(index);
 	}
-	Tag query(int index,int Left,int Right,int j) {
-		if(Right<tree[index].left||Left>tree[index].right)return Tag();
-		if(Left<=tree[index].left&&Right>=tree[index].right)return tree[index].tag[j];
-		return query(rs,Left,Right,j)+query(ls,Left,Right,j);
-	}
 } st;
 
 bool cmp(int x,int y) {
@@ -227,7 +222,7 @@ int main() {
 		else if(opt=='Q') {
 			for(int i=0; i<m; i++)ans[i]=st.tree[root[1]].tag[i].g();
 			wtf.ufwt(ans);
-			printf("%d\n",ans[x]);
+			printf("%d\n",(ans[x]+mod)%mod);
 		}
 	}
 	return 0;
