@@ -122,12 +122,15 @@ LL get_f(int x) {
 }
 
 void Modify(int x,int v) {
+	vector<LL> last;
+	int tmp=x,posl=0;
+	for(int t; father[t=Top[x]]; x=father[t])last.push_back(st.tree[root[t]].tag.val());
+	x=tmp;
 	val[x]+=v;
 	if(!Son[x])f[x]+=v;
-	for(int t; father[t=Top[x]]; x=father[t],t=Top[x]) {
-		LL last=st.tree[root[t]].tag.val();
+	for(int t; father[t=Top[x]]; x=father[t]) {
 		st.modify(root[t],pos[x],Tag(f[x],val[x]));
-		f[father[t]]+=-last+st.tree[root[t]].tag.val();
+		f[father[t]]+=-last[posl++]+st.tree[root[t]].tag.val();
 	}
 	st.modify(root[Top[x]],pos[x],Tag(f[x],val[x]));
 }
