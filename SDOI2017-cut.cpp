@@ -11,8 +11,6 @@
 
 using namespace std;
 
-typedef long long LL;
-
 inline const int Get_Int() {
 	int num=0,bj=1;
 	char x=getchar();
@@ -40,7 +38,7 @@ struct FastWalshTransform {
 			int mid=len>>1;
 			for(int *p=a; p!=a+n; p+=len)
 				for(int i=0; i<mid; i++) {
-					LL x=p[i],y=p[mid+i];
+					int x=p[i],y=p[mid+i];
 					p[i]=(x+y)*mul%mod;
 					p[mid+i]=(x-y+mod)*mul%mod;
 				}
@@ -67,12 +65,14 @@ struct Integer {
 		else num=cnt=1;
 	}
 	Integer operator * (int v) {
+		v%=mod;
 		Integer a=*this;
 		if(!v)a.cnt++;
 		else a.num=a.num*v%mod;
 		return a;
 	}
 	Integer operator / (int v) {
+		v%=mod;
 		Integer a=*this;
 		if(!v)a.cnt--;
 		else a.num=a.num*inv[v]%mod;
@@ -93,7 +93,7 @@ void Dfs1(int Now,int fa,int depth) {
 		Size[Now]+=Size[Next];
 		if(Size[Son[Now]]<Size[Next])Son[Now]=Next;
 	}
-	if(edges[Now].size()==1)leaf[Now]=1;
+	if(fa&&edges[Now].size()==1)leaf[Now]=1;
 }
 
 void Dfs2(int Now,int top) {
@@ -110,10 +110,10 @@ void Dfs2(int Now,int top) {
 struct Tag {
 	int a,b,c,d;
 	Tag(int a=1,int b=0,int c=0,int d=0):a(a),b(b),c(c),d(d) {}
-	int f() {return a+c;}
-	int g() {return b+d;}
+	int f() {return (a+c)%mod;}
+	int g() {return (b+d)%mod;}
 	Tag operator + (const Tag &y) const {
-		return Tag(a*y.a,b+a*y.b,y.a*c+y.b,y.b*c+d+y.d);
+		return Tag(a*y.a%mod,(b+a*y.b)%mod,(y.a*c+y.c)%mod,(y.b*c+d+y.d)%mod);
 	}
 };
 
@@ -134,8 +134,8 @@ struct Segment_Tree {
 		if(left==right) {
 			int x=chain[top][left-1];
 			for(int i=0; i<m; i++) {
-				int tmp=f[x][i].val()*e[val[x]][i];
-				tree[index].tag[i]=Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]);
+				int tmp=f[x][i].val()*e[val[x]][i]%mod;
+				tree[index].tag[i]=Tag(tmp,tmp,leaf[x]?0:tmp,((leaf[x]?0:tmp)+g[x][i])%mod);
 			}
 			pos[chain[top][left-1]]=left;
 			return;
@@ -147,14 +147,17 @@ struct Segment_Tree {
 	void push_up(int index) {
 		for(int i=0; i<m; i++)tree[index].tag[i]=tree[rs].tag[i]+tree[ls].tag[i];
 	}
-	void modify(int index,int target,int j,Tag v) {
+	void update(int index,int target,int x) {
 		if(target<tree[index].left||target>tree[index].right)return;
 		if(tree[index].left==tree[index].right) {
-			tree[index].tag[j]=v;
+			for(int i=0; i<m; i++) {
+				int tmp=f[x][i].val()*e[val[x]][i]%mod;
+				tree[index].tag[i]=Tag(tmp,tmp,leaf[x]?0:tmp,((leaf[x]?0:tmp)+g[x][i])%mod);
+			}
 			return;
 		}
-		modify(ls,target,j,v);
-		modify(rs,target,j,v);
+		update(ls,target,x);
+		update(rs,target,x);
 		push_up(index);
 	}
 } st;
@@ -164,19 +167,28 @@ bool cmp(int x,int y) {
 }
 
 void Modify(int x,int v) {
-	val[x]=v;
-	for(int t; father[t=Top[x]]; x=father[t],t=Top[x])
+	vector<int> lastf,lastg;
+	int tmp=x;
+	for(int t; father[t=Top[x]]; x=father[t])
 		for(int i=0; i<m; i++) {
-			LL lastf=st.tree[root[t]].tag[i].f(),lastg=st.tree[root[t]].tag[i].g();
-			int tmp=f[x][i].val()*e[val[x]][i];
-			st.modify(root[t],pos[x],i,Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]));
-			f[father[t]][i]/=lastf+e[0][i],f[father[t]][i]*=st.tree[root[t]].tag[i].f()+e[0][i];
-			g[father[t]][i]=(g[father[t]][i]-lastg+mod)%mod,g[father[t]][i]=(g[father[t]][i]+st.tree[root[t]].tag[i].g())%mod;
+			lastf.push_back(st.tree[root[t]].tag[i].f());
+			lastg.push_back(st.tree[root[t]].tag[i].g());
 		}
-	for(int i=0; i<m; i++) {
-		int tmp=f[x][i].val()*e[val[x]][i];
-		st.modify(root[Top[x]],pos[x],i,Tag(tmp,tmp,leaf[x]?0:tmp,(leaf[x]?0:tmp)+g[x][i]));
+	x=tmp;
+	int posf=0,posg=0;
+	val[x]=v;
+	for(int t; father[t=Top[x]]; x=father[t]) {
+		st.update(root[t],pos[x],x);
+		for(int i=0; i<m; i++) {
+			int lf=lastf[posf++],lg=lastg[posg++];
+			int tmp=f[x][i].val()*e[val[x]][i]%mod;
+			f[father[t]][i]/=lf+e[0][i],f[father[t]][i]*=st.tree[root[t]].tag[i].f()+e[0][i];
+			g[father[t]][i]=(g[father[t]][i]-lg+mod)%mod,g[father[t]][i]=(g[father[t]][i]+st.tree[root[t]].tag[i].g())%mod;
+		}
 	}
+	st.update(root[Top[x]],pos[x],x);
+	for(int i=0; i<m; i++)ans[i]=st.tree[root[1]].tag[i].g();
+	wtf.ufwt(ans);
 }
 
 void AddEdge(int x,int y) {
@@ -195,7 +207,7 @@ int main() {
 	for(int i=2; i<mod; i++)inv[i]=(mod-mod/i)*inv[mod%i]%mod;
 	for(int i=1; i<=n; i++) {
 		val[i]=Get_Int();
-		for(int j=0; j<m; j++)f[i][j]=Integer(1);
+		for(int j=0; j<m; j++)f[i][j]=1;
 	}
 	for(int i=1; i<n; i++) {
 		int x=Get_Int(),y=Get_Int();
@@ -213,17 +225,15 @@ int main() {
 				g[father[x]][i]=(g[father[x]][i]+st.tree[root[x]].tag[i].g())%mod;
 			}
 	}
+	for(int i=0; i<m; i++)ans[i]=st.tree[root[1]].tag[i].g();
+	wtf.ufwt(ans);
 	int q=Get_Int();
 	while(q--) {
 		char opt=' ';
 		while(!isalpha(opt))opt=getchar();
 		int x=Get_Int();
 		if(opt=='C')Modify(x,Get_Int());
-		else if(opt=='Q') {
-			for(int i=0; i<m; i++)ans[i]=st.tree[root[1]].tag[i].g();
-			wtf.ufwt(ans);
-			printf("%d\n",(ans[x]+mod)%mod);
-		}
+		else printf("%d\n",(ans[x]+mod)%mod);
 	}
 	return 0;
 }
