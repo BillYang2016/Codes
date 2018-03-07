@@ -26,7 +26,7 @@ void Dp() {
 				for(int S=0; S<lim; S++)f[u][l][S]=0;
 				f[u][l][0]=1;
 				for(int x=u; x<=n; x++) {
-					for(int y=l; y<r; y++) { //<r
+					for(int y=l; y<=r; y++) {
 						for(int S=0; S<lim; S++)f[x][y+1][S]=0;
 						for(int S=0; S<lim; S++)
 							if(f[x][y][S]) {
@@ -35,15 +35,7 @@ void Dp() {
 								if(x>u&&a[x-1][y]&&a[x][y]&&!(S&bit[y-l]))add(f[x][y+1][S|bit[y-l]],f[x][y][S]); //竖放
 							}
 					}
-					//==r
-					for(int S=0; S<lim; S++)f[x+1][l][S]=0;
-					for(int S=0; S<lim; S++)
-						if(f[x][r][S]) {
-							add(f[x+1][l][S&(~bit[r-l])],f[x][r][S]);
-							if(r>l&&a[x][r-1]&&a[x][r]&&!(S&bit[r-l-1]))add(f[x+1][l][S|bit[r-l]|bit[r-l-1]],f[x][r][S]); //横放
-							if(x>u&&a[x-1][r]&&a[x][r]&&!(S&bit[r-l]))add(f[x+1][l][S|bit[r-l]],f[x][r][S]); //竖放
-						}
-					for(int S=0; S<lim; S++)add(h[u][x][l][r],f[x+1][l][S]);
+					for(int S=0; S<lim; S++)add(h[u][x][l][r],f[x+1][l][S]=f[x][r+1][S]);
 				}
 			}
 }
