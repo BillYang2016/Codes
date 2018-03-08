@@ -10,6 +10,11 @@ inline int Get_Int() {
 	return num*bj;
 }
 
+const int maxn=100005,maxv=10000005,maxp=1000005;
+
+int n,a[maxn],b[maxn],Prime[maxv],lp[maxv],g[maxp],sum[maxp];
+bool vst[maxv];
+
 void Prime_Table(int n) {
 	for(int i=2; i<=n; i++) {
 		if(!vst[i]) {vst[i]=1;Prime[++cnt]=i;lp[i]=cnt;}
@@ -33,11 +38,26 @@ int main() {
 		}
 		int k=0;
 		for(int i=1; i<=n; i++) {
-			int tmp=c[i];
-			while(tmp>1) {
-
+			int x=b[i];
+			while(x>1) {
+				int p=lp[x];
+				sum[p]++;
+				g[p]=__gcd(g[p],c[i]);
+				if(k<sum[p]+sum[0])k=sum[p]+sum[0],m=0;
+				else if(k==sum[p]+sum[0])m=max(m,g[p]);
+				while(x%Prime[p]==0)x/=Prime[p];
+			}
+		}
+		for(int i=1; i<=n; i++) { //clear
+			int x=b[i];
+			while(x>1) {
+				int p=lp[x];
+				sum[p]=g[p]=0;
+				sum[p]++;
+				while(x%Prime[p]==0)x/=Prime[p];
 			}
 		}
 	}
+	printf("%d %d\n",k,m);
 	return 0;
 }
