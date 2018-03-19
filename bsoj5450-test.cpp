@@ -42,7 +42,7 @@ int main() {
 	n=Get_Int();
 	Mobius_Table(n);
 	for(int i=1; i<=cnt; i++)if(Cal(n,p[i])&1)a.push_back(p[i]),sig[i]=1;
-	int t=ceil(sqrt(n)),Max=0;
+	int t=sqrt(n),Max=0;
 	for(int i=2; i<=n; i++)
 		if(u[i]) {
 			bool bj=1;
@@ -51,7 +51,7 @@ int main() {
 			int up=0,S=0;
 			for(int j=0; j<a.size(); j++)
 				if(i%a[j]==0) {
-					if(a[j]>=t)up=a[j];
+					if(a[j]>t)up=a[j];
 					else S|=1<<j,Max=max(Max,j+1);
 				}
 			vec[up].push_back(S);
