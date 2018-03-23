@@ -5,3 +5,5 @@ The repository is used to transport codes from computers.
 **Be careful to read & download.**  
 ## Contributor
 - Bill Yang
+## Related repositories
+- [OI-Template](https://github.com/BillYang2016/OI-Template)
