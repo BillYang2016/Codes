@@ -13,25 +13,20 @@ inline int Get_Int() {
 const int maxn=265;
 
 int n,m,k;
-bool ans[maxn];
 char s[maxn];
 bitset<maxn> a[maxn<<1],f[maxn][maxn];
 
 bool Gauss(int n) {
-	for(int i=1; i<=n; i++) {
-		int row=i;
+	int now=0;
+	for(int i=1; i<=m; i++) {
+		int row=now+1;
 		for(; row<=n; row++)if(a[row][i])break;
 		if(row>n)continue;
-		swap(a[i],a[row]);
-		for(int j=i+1; j<=n; j++)if(a[j][i])a[j]^=a[i];
+		now++;
+		swap(a[now],a[row]);
+		for(int j=1; j<=n; j++)if(now!=j&&a[j][i])a[j]^=a[now];
 	}
-	for(int i=n; i>=1; i--) {
-		bool bj=1;
-		for(int j=1; j<=m; j++)if(a[i][j]) {bj=0;break;}
-		if(bj&&a[i][m+1])return 0;
-		ans[i]=a[i][i]?a[i][m+1]:1;
-		if(ans[i])for(int j=1; j<i; j++)if(a[j][i])a[j].flip(m+1);
-	}
+	for(int i=now+1; i<=n; i++)if(a[i][m+1])return 0;
 	return 1;
 }
 
