@@ -20,10 +20,9 @@ LL a[maxn][maxn],b[maxn][maxn],Ans[maxn];
 char s[maxn][1005];
 
 LL Mul(LL a,LL b) {
-	LL ans=0;
-	for(; b; b>>=1,a=(a+a)%mod)if(b&1)ans=(ans+a)%mod;
-	return ans;
-}
+	LL tmp=(a*b-(LL)((long double)a/mod*b+1e-8)*mod);
+	if(tmp<0)return tmp+mod;
+	else return tmp;}
 
 void Exgcd(LL a,LL b,LL &gcd,LL &x,LL &y) {
 	if(!b)gcd=a,x=1,y=0;
@@ -35,6 +34,9 @@ LL inv(LL a,LL p) {
 	Exgcd(a,p,d,x,y);
 	return (x%p+p)%p;
 }
+
+LL add(LL a,LL b,LL mod) {return a+b>=mod?a+b-mod:a+b;}
+void mis(LL &a,LL b,LL mod) {a=a-b<0?a-b+mod:a-b;}
 
 void Gauss_Jordan(int n,LL mod,LL a[][maxn]) {
 	for(int i=1; i<=n; i++) {
@@ -52,7 +54,7 @@ void Gauss_Jordan(int n,LL mod,LL a[][maxn]) {
 		for(int j=1; j<=n; j++)
 			if(j!=i) {
 				t=a[j][i];
-				for(int k=1; k<=n+1; k++)a[j][k]=(a[j][k]+mod-t*a[i][k]%mod)%mod;
+				for(int k=1; k<=n+1; k++)mis(a[j][k],t*a[i][k]%mod,mod);
 			}
 	}
 }
@@ -68,7 +70,7 @@ int main() {
 	LL inv1=inv(mod2,mod1),inv2=inv(mod1,mod2);
 	for(int i=1; i<=n; i++) {
 		LL a1=a[i][n+1],a2=b[i][n+1];
-		printf("%lld\n",(Mul(mod2*inv1%mod,a1)+Mul(mod1*inv2%mod,a2))%mod);
+		printf("%lld\n",add(Mul(mod2*inv1%mod,a1),Mul(mod1*inv2%mod,a2),mod));
 	}
 	return 0;
 }
