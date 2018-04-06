@@ -25,7 +25,7 @@ struct Linear_Bases {
 		for(int j=K; j>=0; j--)
 			if(now.val>>j&1) {
 				if(b[j].val) {
-					swap(b[j],now);
+					if(now.id<b[j].id)swap(b[j],now);
 					now.val^=b[j].val;
 					continue;
 				}
