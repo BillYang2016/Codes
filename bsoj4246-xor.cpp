@@ -12,7 +12,7 @@ inline LL Get_Int() {
 	return num*bj;
 }
 
-const int maxn=20005,K=31;
+const int maxn=50005,K=31;
 
 struct Linear_Bases {
 	vector<LL> a;
