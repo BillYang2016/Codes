@@ -83,9 +83,9 @@ void Query(int Left,int Right) {
 	Linear_Bases lb=st.query(1,Left,Right);
 	lb.split();
 	int len=lb.a.size();
-	LL Max=lb.cal(),ans=0;
+	long long Max=lb.cal(),ans=0;
 	for(int i=1; i<lb.a.size(); i++)ans+=lb.a[i]^Max;
-	printf("%u\n",ans+Max*((Right-Left+1)-len+1));
+	printf("%lld\n",ans+Max*((Right-Left+1)-len+1));
 }
 
 int main() {
