@@ -38,7 +38,9 @@ struct Palindsome_Automaton {
 		next[0]=1;
 	}
 	int newnode(int v) {
-		return ++size;
+		int now=++size;
+		len[now]=v;
+		return now;
 	}
 	void insert(int data) {
 		s[++n]=data;
