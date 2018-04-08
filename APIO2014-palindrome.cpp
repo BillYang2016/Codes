@@ -37,11 +37,7 @@ struct Palindsome_Automaton {
 		s[0]=-1;
 		next[0]=1;
 	}
-	int newnode(int v) {
-		int now=++size;
-		len[now]=v;
-		return now;
-	}
+	int newnode(int v) {len[++size]=v;return size;}
 	void insert(int data) {
 		s[++n]=data;
 		int p=last;
@@ -55,12 +51,8 @@ struct Palindsome_Automaton {
 		last=child[p][data];
 		cnt[last]++;
 	}
-	void build(string s) {
-		for(auto x:s)insert(x-'a');
-	}
-	void count() {
-		for(int i=size; i>=0; i--)cnt[next[i]]+=cnt[i];
-	}
+	void build(string s) {for(auto x:s)insert(x-'a');}
+	void count() {for(int i=size; i>=0; i--)cnt[next[i]]+=cnt[i];}
 } pam;
 
 char s[maxn];
