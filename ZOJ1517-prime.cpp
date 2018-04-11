@@ -22,11 +22,21 @@ LL Quick_Pow(LL a,LL b,LL p) {
 	return ans;
 }
 
-bool Miller_Rabin(LL x) {
-	if(x==2)return 1;
-	if(x<2||!(x&1))return 0;
+bool Witness(LL a,LL n) {
+	LL u=n-1,t=0;
+	while(!(u&1))u>>=1,t++;
+	LL x=Quick_Pow(a,u,n);
+	for(int i=1; i<=t; i++,x=x*x%n)
+		if(x==1)return 0;
+		else if(x!=n-1&&x*x%n==1)return 1;
+	return x!=1;
+}
+
+bool Miller_Rabin(LL n) {
+	if(n==2)return 1;
+	if(n<2||!(n&1))return 0;
 	srand(time(NULL));
-	for(int i=1; i<=times; i++)if(Quick_Pow(g()%(x-1)+1,x-1,x)!=1)return 0;
+	for(int i=1; i<=times; i++)if(Witness(g()%(n-1)+1,n))return 0;
 	return 1;
 }
 
