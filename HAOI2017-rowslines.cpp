@@ -38,14 +38,12 @@ struct Linear_Bases {
 		for(int j=K; j>=0; j--)if(num[j]) {
 			if(b[j].any()) {num^=b[j];continue;}
 			b[j]=num;
-			for(int k=j-1; k>=0; k--)if(b[j][k])b[j]^=b[k];
-			for(int k=j+1; k<=K; k++)if(b[k][j])b[k]^=b[j];
 			break;
 		}
 	}
 	bit cal() {
 		bit ans=0;
-		for(int i=0; i<=K; i++)ans^=b[i];
+		for(int i=K; i>=0; i--)if(!ans[i])ans^=b[i];
 		return ans;
 	}
 };
