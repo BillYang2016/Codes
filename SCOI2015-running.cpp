@@ -13,23 +13,20 @@ inline int Get_Int() {
 const int maxn=200005;
 const double eps=1e-8;
 
-int dcmp(double x) {
-	if(fabs(x)<=eps)return 0;
-	return x>eps?1:-1;
-}
+int dcmp(double x) {return fabs(x)<=eps?0:x>eps?1:-1;}
 
 struct Point {
 	double x,y;
-	Point(double _x=0,double _y=0):x(_x),y(_y) {}
-	Point operator + (const Point& a) const {return Point(x+a.x,y+a.y);}
-	Point operator - (const Point& a) const {return Point(a.x-x,a.y-y);}
+	Point(double x=0,double y=0):x(x),y(y) {}
+	Point operator + (const Point &a) const {return Point(x+a.x,y+a.y);}
+	Point operator - (const Point &a) const {return Point(a.x-x,a.y-y);}
 	Point operator * (double a) const {return Point(x*a,y*a);}
 	Point operator / (double a) const {return Point(x/a,y/a);}
 };
 
 typedef Point Vector;
 
-double Cross(const Vector& a,const Vector& b) {return a.x*b.y-b.x*a.y;}
+double Cross(const Vector &a,const Vector &b) {return a.x*b.y-b.x*a.y;}
 
 struct Line {
 	Point p;
@@ -37,7 +34,7 @@ struct Line {
 	double ang;
 	Line() {}
 	Line(Point p,Vector v):p(p),v(v) {ang=atan2(v.y,v.x);}
-	bool operator < (const Line& L) const {return ang<L.ang;}
+	bool operator < (const Line &b) const {return ang<b.ang;}
 };
 
 bool OnLeft(Line L,Point p) {return dcmp(Cross(L.v,L.p-p))>=0;}
@@ -48,18 +45,18 @@ Point GetIntersection(Line a,Line b) {
 	return a.p+a.v*t;
 }
 
-double Area(Point a,Point b,Point c) {return Cross(b-a,c-a);}
+double Area(Point a,Point b,Point c) {return Cross(a-b,a-c);}
 
-double Area(int n,Point* P) {
+double Area(int n,Point *p) {
 	double ans=0;
-	for(int i=2; i<n; i++)ans+=Area(P[1],P[i],P[i+1]);
+	for(int i=2; i<n; i++)ans+=Area(p[1],p[i],p[i+1]);
 	return ans/2;
 }
 
 int Unique(int n,Line *L) {
 	int cnt=1;
 	for(int i=2; i<=n; i++) {
-		if(dcmp(L[cnt].ang-L[i].ang)!=0)L[++cnt]=L[i];
+		if(dcmp(L[cnt].ang-L[i].ang))L[++cnt]=L[i];
 		else if(OnLeft(L[cnt],L[i].p))L[cnt]=L[i];
 	}
 	return cnt;
