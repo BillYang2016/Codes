@@ -51,10 +51,11 @@ struct FastFourierTransform {
 } fft;
 
 int n,m;
+cp a[maxn],b[maxn];
 
 int main() {
-	n=Get_Int();
-	m=Get_Int();
+	n=Get_Int()+1;
+	m=Get_Int()+1;
 	int t=1;
 	while(t<(n+m))t<<=1;
 	fft.init(t);
@@ -63,6 +64,6 @@ int main() {
 	fft.dft(a),fft.dft(b);
 	for(int i=0; i<t; i++)a[i]*=b[i];
 	fft.idft(a);
-	for(int i=0; i<n+m+1; i++)printf("%d\n",(int)round(a[i].real()));
+	for(int i=0; i<n+m-1; i++)printf("%d\n",(int)round(a[i].real()));
 	return 0;
 }
