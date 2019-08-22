@@ -22,4 +22,3 @@ int main() {
 	else printf("%d\n",n/2);
 	return 0;
 }
-
