@@ -31,6 +31,8 @@ LL Quick_Pow(LL a,LL b) {
 
 LL inv(LL a) {return Quick_Pow(a,p-2);}
 
+void add(LL &x,LL v) {x=(x+v)%p;}
+
 int main() {
 	n=Get_Int();
 	for(int i=1; i<=n; i++) {
@@ -42,9 +44,9 @@ int main() {
 	for(int i=1; i<=n; i++)
 		for(int j=i+1; j<=n; j++) {
 			if(a[i].r<=a[j].l)continue;
-			if(a[i].l<=a[j].l&&a[j].r>a[i].r)ans+=a[i].inv*a[j].inv*(a[i].r-a[j].l)%p*(a[i].r-a[j].l+1)%p*inv2%p;
-			else if(a[i].l>a[j].l&&a[j].r>a[i].r)ans+=a[i].inv*a[j].inv*((a[i].r-a[i].l+1)*(a[i].l-a[j].l-1)%p+(a[i].r-a[i].l+1)*(a[i].r-a[i].l)%p*inv2%p)%p;
-			else ans+=a[i].inv*a[j].inv%p*(2*a[i].r-a[j].l-a[j].r)%p*(a[j].r-a[j].l+1)%p*inv2%p;
+			if(a[i].l<=a[j].l&&a[j].r>a[i].r)add(ans,a[i].inv*a[j].inv%p*(a[i].r-a[j].l)%p*(a[i].r-a[j].l+1)%p*inv2%p);
+			else if(a[i].l>a[j].l&&a[j].r>a[i].r)add(ans,a[i].inv*a[j].inv%p*((a[i].r-a[i].l+1)*(a[i].l-a[j].l)%p+(a[i].r-a[i].l+1)*(a[i].r-a[i].l)%p*inv2%p)%p);
+			else add(ans,a[i].inv*a[j].inv%p*(2*a[i].r-a[j].l-a[j].r)%p*(a[j].r-a[j].l+1)%p*inv2%p);
 		}
 	printf("%lld\n",ans);
 	return 0;
