@@ -1,26 +1,12 @@
-#include<algorithm>
-#include<iostream>
-#include<iomanip>
-#include<cstring>
-#include<cstdlib>
-#include<climits>
-#include<vector>
-#include<cstdio>
-#include<cmath>
-#include<queue>
+#include<bits/stdc++.h>
+
 using namespace std;
 
-inline const int Get_Int() {
+inline int Get_Int() {
 	int num=0,bj=1;
 	char x=getchar();
-	while(x<'0'||x>'9') {
-		if(x=='-')bj=-1;
-		x=getchar();
-	}
-	while(x>='0'&&x<='9') {
-		num=num*10+x-'0';
-		x=getchar();
-	}
+	while(!isdigit(x)) {if(x=='-')bj=-1;x=getchar();}
+	while(isdigit(x)) {num=num*10+x-'0';x=getchar();}
 	return num*bj;
 }
 
@@ -32,10 +18,7 @@ void check(LL &x) {
 	if(x<0)x+=mod;
 }
 
-void add(LL &x,LL v) {
-	x+=v;
-	check(x);
-}
+void add(LL &x,LL v) {x+=v;check(x);}
 
 LL Quick_Pow(LL a,LL b) {
 	LL sum=1;
@@ -43,9 +26,7 @@ LL Quick_Pow(LL a,LL b) {
 	return sum;
 }
 
-LL inv(LL x) {
-	return Quick_Pow(x,mod-2);
-}
+LL inv(LL x) {return Quick_Pow(x,mod-2);}
 
 struct NumberTheoreticTransform {
 	int n,rev[maxn];
@@ -166,4 +147,4 @@ int main() {
 	fill(inv_root_c+m+1,inv_root_c+n,0);
 	for(int i=1; i<=m; i++)printf("%lld\n",2*inv_root_c[i]%mod);
 	return 0;
-} 
+}
