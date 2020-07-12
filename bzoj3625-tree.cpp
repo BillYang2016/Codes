@@ -1,30 +1,18 @@
-#include<algorithm>
-#include<iostream>
-#include<iomanip>
-#include<cstring>
-#include<cstdlib>
-#include<climits>
-#include<vector>
-#include<cstdio>
-#include<cmath>
-#include<queue>
+#include<bits/stdc++.h>
+
 using namespace std;
 
-inline const int Get_Int() {
+inline int Get_Int() {
 	int num=0,bj=1;
 	char x=getchar();
-	while(x<'0'||x>'9') {
-		if(x=='-')bj=-1;
-		x=getchar();
-	}
-	while(x>='0'&&x<='9') {
-		num=num*10+x-'0';
-		x=getchar();
-	}
+	while(!isdigit(x)) {if(x=='-')bj=-1;x=getchar();}
+	while(isdigit(x)) {num=num*10+x-'0';x=getchar();}
 	return num*bj;
 }
 
-const int maxn=131072+5;
+typedef long long LL;
+
+const int maxn=262144+5;
 const LL mod=998244353,g=3,inv2=499122177;
 
 void check(LL &x) {
@@ -43,9 +31,7 @@ LL Quick_Pow(LL a,LL b) {
 	return sum;
 }
 
-LL inv(LL x) {
-	return Quick_Pow(x,mod-2);
-}
+LL inv(LL x) {return Quick_Pow(x,mod-2);}
 
 struct NumberTheoreticTransform {
 	int n,rev[maxn];
@@ -91,62 +77,38 @@ struct NumberTheoreticTransform {
 	}
 } ntt;
 
-void polynomial_inverse(const LL* a,const int n,LL* ans) {
+void polynomial_inverse(const LL* a,const int n,LL* b) {
 	if(n==1) {
-		ans[0]=inv(a[0]);
+		b[0]=inv(a[0]);
 		return;
 	}
-	int mid=ceil(n/2.0);
-	polynomial_inverse(a,mid,ans);
-	int p=1;
-	while(p<n<<1)p<<=1;
+	polynomial_inverse(a,n>>1,b);
+	int p=n<<1;
 	static LL x[maxn];
 	copy(a,a+n,x),fill(x+n,x+p,0);
-	ntt.init(p);
-	ntt.dft(x);
-	fill(ans+mid,ans+p,0);
-	ntt.dft(ans);
-	for(int i=0; i<p; i++)ans[i]=ans[i]*((2-x[i]*ans[i]%mod+mod)%mod)%mod;
-	ntt.idft(ans);
+	ntt.init(p),ntt.dft(x),ntt.dft(b);
+	for(int i=0; i<p; i++)b[i]=b[i]*((2-x[i]*b[i]%mod+mod)%mod)%mod;
+	ntt.idft(b),fill(b+n,b+p,0);
 }
 
-void polynomial_sqrt(const LL* a,const int n,LL* ans) {
+void polynomial_sqrt(const LL* a,const int n,LL* b) {
 	if(n==1) {
-		ans[0]=1;
+		b[0]=1;
 		return;
 	}
-	int mid=ceil(n/2.0);
-	polynomial_sqrt(a,mid,ans);
-	int p=1;
-	while(p<n<<1)p<<=1;
-	static LL inv_b[maxn];
-	fill(inv_b,inv_b+n,0);
-	polynomial_inverse(ans,n,inv_b);
-	fill(inv_b+n,inv_b+p,0);
-	static LL x[maxn];
+	polynomial_sqrt(a,n>>1,b);
+	int p=n<<1;
+	static LL inv_b[maxn],x[maxn];
+	fill(inv_b,inv_b+p,0);
+	polynomial_inverse(b,n,inv_b);
 	copy(a,a+n,x),fill(x+n,x+p,0);
-	ntt.init(p);
-	ntt.dft(x);
-	fill(ans+mid,ans+p,0);
-	ntt.dft(ans);
-	ntt.dft(inv_b);
-	for(int i=0; i<p; i++)ans[i]=inv2*(x[i]*inv_b[i]%mod+ans[i])%mod;
-	ntt.idft(ans);
+	ntt.init(p),ntt.dft(x),ntt.dft(b),ntt.dft(inv_b);
+	for(int i=0; i<p; i++)b[i]=(x[i]*inv_b[i]%mod+b[i])%mod*inv2%mod;
+	ntt.idft(b),fill(b+n,b+p,0);
 }
 
-void Multiply(const LL* a1,const int n1,const LL* a2,const int n2,LL* ans) {
-	int n=1;
-	while(n<n1+n2)n<<=1;
-	static LL c1[maxn],c2[maxn];
-	copy(a1,a1+n1,c1),fill(c1+n1,c1+n,0);
-	copy(a2,a2+n1,c2),fill(c2+n1,c2+n,0);
-	ntt.init(n);
-	ntt.dft(c1);
-	ntt.dft(c2);
-	for(int i=0; i<n; i++)c1[i]=c1[i]*c2[i]%mod;
-	ntt.idft(c1);
-	for(int i=0; i<n1+n2-1; i++)ans[i]=c1[i];
-}
+int n,m;
+LL C[maxn],sqrt_C[maxn],inv_sqrt_C[maxn];
 
 int main() {
 	n=Get_Int();
@@ -157,13 +119,12 @@ int main() {
 	}
 	C[0]=1;
 	for(int i=1; i<=m; i++)C[i]=(-4*C[i]%mod+mod)%mod;
-	polynomial_sqrt(c,m+1,sqrt_c);
 	int p=1;
-	while(p<((m+1)<<1))p<<=1;
+	while(p<(m+1))p<<=1;
+	polynomial_sqrt(C,p,sqrt_C);
 	fill(C+m+1,C+p,0);
-	add(sqrt_c[0],1);
-	polynomial_inverse(root_c,m+1,inv_root_c);
-	fill(inv_root_c+m+1,inv_root_c+n,0);
-	for(int i=1; i<=m; i++)printf("%lld\n",2*inv_root_c[i]%mod);
+	add(sqrt_C[0],1);
+	polynomial_inverse(sqrt_C,p,inv_sqrt_C);
+	for(int i=1; i<=m; i++)printf("%lld\n",2*inv_sqrt_C[i]%mod);
 	return 0;
-} 
+}
