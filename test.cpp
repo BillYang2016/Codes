@@ -2,21 +2,14 @@
 
 using namespace std;
 
-inline int Get_Int() {
-	int num=0,bj=1;
-	char x=getchar();
-	while(!isdigit(x)) {if(x=='-')bj=-1;x=getchar();}
-	while(isdigit(x)) {num=num*10+x-'0';x=getchar();}
-	return num*bj;
+int gcd(int a,int b) {
+	if(b==0)return a;
+	return gcd(b,a%b);
 }
 
+int lcm(int a,int b) {return a/gcd(a,b)*b;}
+
 int main() {
-	srand(time(NULL));
-	int t=1000000,n=4,cnt=0,a[105];
-	while(t--) {
-		for(int i=1; i<=n; i++)a[i]=rand()%2;
-		if(a[1]==a[2]&&a[2]==a[3]&&a[3]==a[4])cnt++;
-	}
-	printf("%d\n",cnt);
+	cout<<gcd(6,8)<<endl;
 	return 0;
 }
